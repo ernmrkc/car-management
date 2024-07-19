@@ -1,46 +1,46 @@
 
-# Car Management Uygulaması
+# Car Management Application
 
-## Genel Bakış
-Car Management uygulaması iki modülden oluşur: Frontend için Angular ve Backend için Spring Boot kullanılmıştır. Uygulama, araç ve marka için CRUD işlemlerini yapabilmenizi, filtreleme ve sıralama işlemlerini gerçekleştirebilmenizi sağlar.
+## Overview
+The Car Management application consists of two modules: Angular for the frontend and Spring Boot for the backend. The application allows you to perform CRUD operations for cars and brands, as well as filtering and sorting functions.
 
-## Başlangıç
+## Getting Started
 
-### Gereksinimler
+### Prerequisites
 - Java JDK 17+
 - Node.js ve npm
 - Angular CLI
 - Maven
 - PostgreSQL
 
-### Kurulum ve Çalıştırma
+### Installation and Running
 
-#### Backend Modülü
-Backend projesini başlatmak için aşağıdaki adımları izleyin:
+#### Backend Module
+Follow the steps below to start the backend project:
 ```bash
 cd BackendModule
 mvn spring-boot:run
 ```
-Backend projesi varsayılan olarak [http://localhost:10150](http://localhost:10150) portunda çalışır.
+The backend project runs on the default port [http://localhost:10150](http://localhost:10150)
 
-#### Frontend Modülü
-Frontend projesini başlatmak için aşağıdaki adımları izleyin:
+#### Frontend Module
+Follow the steps below to start the frontend project:
 ```bash
 cd ../FrontendModule
 ng serve
 ```
-Frontend projesi varsayılan olarak [http://localhost:4150](http://localhost:4150) portunda çalışır.
+The backend project runs on the default port [http://localhost:4150](http://localhost:4150)
 
-## Port Değişikliği
+## Port Change
 
-### Backend Port Değişikliği
-Backend projesinde portu değiştirmek için `application.properties` dosyasındaki `server.port` değerini düzenleyin:
+### Backend Port Change
+To change the port in the backend project, update the `server.port` value in the `application.properties` file:
 ```properties
 server.port=10150
 ```
 
-### Frontend Port Değişikliği
-Frontend projesinde portu değiştirmek için `angular.json` dosyasındaki aşağıdaki kısmı düzenleyin:
+### Frontend Port Change
+To change the port in the frontend project, update the following section in the `angular.json` file:
 ```json
 {
   ...
@@ -60,12 +60,12 @@ Frontend projesinde portu değiştirmek için `angular.json` dosyasındaki aşa�
 ```
 
 ## Swagger UI
-API dokümantasyonuna erişmek için backend modülü çalıştıktan sonra aşağıdaki URL'yi ziyaret edebilirsiniz:
+To access the API documentation, you can visit the following URL after the backend module is running:
 ```
 http://localhost:10150/swagger-ui/index.html
 ```
 
-## Kullanılan Teknolojiler
+## Technologies Stack
 ### Frontend:
 - Angular
 - TypeScript
@@ -79,6 +79,6 @@ http://localhost:10150/swagger-ui/index.html
 - JPA / Hibernate
 - Camunda
 
-### Veritabanı:
+### Database:
 - PostgreSQL
 - Redis
