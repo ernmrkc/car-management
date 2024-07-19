@@ -1,0 +1,182 @@
+<div class="container">
+  <div class="header">
+    <h2>Vehicles</h2>
+    <div class="button-container">
+      <button class="new-car-btn" (click)="openNewCarPanel()">+ New Vehicle</button>
+      <button class="brands-btn" (click)="openBrandsPanel()">Brands</button>
+    </div>
+  </div>
+  <p>Total {{ totalElements }} vehicles found</p>
+
+  <div class="search-pagination-container">
+    <div class="search-container">
+      <input type="text" [(ngModel)]="searchTerm" (input)="onSearchTermChange()" placeholder="Search by brand or features..." class="search-input" />
+      <button class="filter-btn" (click)="openFilterPanel()">Filter</button>
+      <button class="filter-btn" (click)="resetFilters()">Reset Filters</button>
+    </div>
+    <div class="pagination-container">
+      <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+      <button (click)="prevPage()" [disabled]="currentPage === 0">Previous</button>
+      <button (click)="nextPage()" [disabled]="currentPage + 1 >= totalPages">Next</button>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+    <tr>
+      <th class="no-sort">Image</th>
+      <th (click)="sortBy('brand')" [class.sorted-asc]="sortByKey === 'brand' && sortDirection === 'asc'" [class.sorted-desc]="sortByKey === 'brand' && sortDirection === 'desc'">Brand</th>
+      <th class="no-sort">Features</th>
+      <th (click)="sortBy('engineLiter')" [class.sorted-asc]="sortByKey === 'engineLiter' && sortDirection === 'asc'" [class.sorted-desc]="sortByKey === 'engineLiter' && sortDirection === 'desc'">Engine Liter</th>
+      <th (click)="sortBy('isNew')" [class.sorted-asc]="sortByKey === 'isNew' && sortDirection === 'asc'" [class.sorted-desc]="sortByKey === 'isNew' && sortDirection === 'desc'">Is New</th>
+      <th (click)="sortBy('price')" [class.sorted-asc]="sortByKey === 'price' && sortDirection === 'asc'" [class.sorted-desc]="sortByKey === 'price' && sortDirection === 'desc'">Price</th>
+      <th (click)="sortBy('releaseDateTime')" [class.sorted-asc]="sortByKey === 'releaseDateTime' && sortDirection === 'asc'" [class.sorted-desc]="sortByKey === 'releaseDateTime' && sortDirection === 'desc'">Release Date</th>
+      <th class="actions-header no-sort">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let car of filteredCars; let i = index">
+      <td><img [src]="getImageUrl(car.image.filename)" alt="{{car.brand.name}}" class="car-image" /></td>
+      <td>{{ car.brand.name }}</td>
+      <td>{{ car.specification }}</td>
+      <td>{{ car.engineLiter }}</td>
+      <td>{{ car.isNew ? 'Yes' : 'No' }}</td>
+      <td [style.color]="getPriceColor(car.price)">{{car.price | currency}}</td>
+      <td>{{ car.releaseDateTime | date: 'yyyy.MM.dd HH:mm:ss' }}</td>
+      <td class="actions-cell">
+        <button class="action-btn" (click)="addToCart(car)">🛒</button>
+        <button class="action-btn" (click)="openEditCarPanel(car, i)">✏️</button>
+        <button class="action-btn" (click)="deleteCar(i)">🗑️</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="cart">
+  <h3>Cart</h3>
+  <p>Total Product: {{ cart.length }} pieces</p>
+  <p>Total Price: {{ totalPrice }} TL</p>
+</div>
+
+<!-- Filter Modal -->
+<div class="modal" *ngIf="showFilterPanel">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Filter Vehicles</h3>
+      <span class="close" (click)="closeFilterPanel()">&times;</span>
+    </div>
+    <form (ngSubmit)="onFilterChange()">
+      <label>
+        Brand:
+        <select [(ngModel)]="brandFilter" name="brand">
+          <option *ngFor="let brand of brands" [value]="brand.name">{{ brand.name }}</option>
+        </select>
+      </label>
+      <label>
+        Specification:
+        <input type="text" [(ngModel)]="specificationFilter" name="specification" />
+      </label>
+      <label>
+        Engine Liter:
+        <input type="number" [(ngModel)]="engineLiterFilter" name="engineLiter" step="0.1" />
+      </label>
+      <label>
+        Is New:
+        <select [(ngModel)]="isNewFilter" name="isNew">
+          <option [value]="true">Yes</option>
+          <option [value]="false">No</option>
+        </select>
+      </label>
+      <label>
+        Min Price:
+        <input type="number" [(ngModel)]="minPriceFilter" name="minPrice" step="10000" />
+      </label>
+      <label>
+        Max Price:
+        <input type="number" [(ngModel)]="maxPriceFilter" name="maxPrice" step="10000" />
+      </label>
+      <label>
+        Min Release Date:
+        <input type="datetime-local" [(ngModel)]="minDateFilter" name="minDate" />
+      </label>
+      <label>
+        Max Release Date:
+        <input type="datetime-local" [(ngModel)]="maxDateFilter" name="maxDate" />
+      </label>
+      <button type="submit">Apply Filters</button>
+    </form>
+  </div>
+</div>
+
+<!-- New Vehicle Add/Edit Modal -->
+<div class="modal" *ngIf="showNewCarPanel || showEditCarPanel">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>{{ showEditCarPanel ? 'Edit Vehicle' : 'Add New Vehicle' }}</h3>
+      <span class="close" (click)="closeCarPanel()">&times;</span>
+    </div>
+    <form (ngSubmit)="showEditCarPanel ? updateCar() : addNewCar()">
+      <label>
+        Brand:
+        <select [(ngModel)]="newCar.brandId" name="brand" required>
+          <option *ngFor="let brand of brands" [ngValue]="brand.id">{{ brand.name }}</option>
+        </select>
+      </label>
+      <label>
+        Features:
+        <input type="text" [(ngModel)]="newCar.specification" name="features" required />
+      </label>
+      <label>
+        Engine Liter:
+        <input type="number" step="0.1" [(ngModel)]="newCar.engineLiter" name="engineLiter" required />
+      </label>
+      <label>
+        Is New:
+        <select [(ngModel)]="newCar.isNew" name="isNew" required>
+          <option [ngValue]="true">Yes</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </label>
+      <label>
+        Price:
+        <input type="number" step="10000" [(ngModel)]="newCar.price" name="price" required />
+      </label>
+      <label>
+        Release Date:
+        <input type="datetime-local" [(ngModel)]="newCar.releaseDateTime" name="releaseDate" required />
+      </label>
+      <label>
+        Add Image:
+        <input type="file" (change)="onFileSelected($event)" />
+      </label>
+      <button type="submit">{{ showEditCarPanel ? 'Update' : 'Add' }}</button>
+    </form>
+  </div>
+</div>
+
+<!-- Brands Modal -->
+<div class="modal" *ngIf="showBrandsPanel">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Manage Brands</h3>
+      <span class="close" (click)="closeBrandsPanel()">&times;</span>
+    </div>
+    <div class="brands-list">
+      <ul>
+        <li *ngFor="let brand of brands; let i = index" class="brand-item">
+          <input type="text" [(ngModel)]="brand.name" />
+          <button class="action-btn" (click)="updateBrand(brand)">💾</button>
+          <button class="action-btn" (click)="deleteBrand(brand.id)">🗑️</button>
+        </li>
+      </ul>
+    </div>
+    <form (ngSubmit)="addBrand()">
+      <label>
+        New Brand:
+        <input type="text" [(ngModel)]="newBrandName" name="newBrandName" required />
+      </label>
+      <button type="submit">Add</button>
+    </form>
+  </div>
+</div>
